@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 
 namespace MtarTool.Core
@@ -33,5 +34,12 @@ namespace MtarTool.Core
                 output.Write(alignmentBytes, 0, alignmentBytes.Length);
             }
         } //method AlignWrite ends
+
+        internal static T[] SubArray<T>(this T[] array, int startPos)
+        {
+            T[] newArray = new T[array.Length - startPos];
+            Array.Copy(array, startPos, newArray, 0, array.Length - startPos);
+            return newArray;
+        } //method SubArray ends
     } //class ExtensionMethods ends
 }

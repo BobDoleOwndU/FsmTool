@@ -1,10 +1,5 @@
 ﻿using FsmTool.Fsm;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FsmTool
 {
@@ -17,9 +12,7 @@ namespace FsmTool
                 string path = Path.GetFullPath(args[0]);
 
                 if(Path.GetExtension(path) == ".fsm")
-                {
                     ReadArchive(args[0]);
-                } //if ends
             } //if ends
         } //method main ends
 

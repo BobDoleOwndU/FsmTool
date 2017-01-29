@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MtarTool.Core;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -40,12 +41,34 @@ namespace FsmTool.Fsm
 
         public void Export(Stream output, string path)
         {
-            for(int i = 0; i < files.Count(); i++)
+            string fileName = path.Replace("_fsm", ".fsm");
+
+            Directory.CreateDirectory(path);
+            bool firstSnd = true;
+            List<byte> wemBytes = new List<byte>(0);
+
+            for (int i = 0; i < files.Count(); i++)
             {
                 files[i].name = i.ToString("0000") + files[i].extension;
-
-                Directory.CreateDirectory(path);
+                
                 File.WriteAllBytes(path + "\\" + files[i].name, files[i].ReadData(output));
+
+                if (files[i].extension == ".snd")
+                {
+                    int readOffset = 16;
+
+                    if (firstSnd)
+                    {
+                        readOffset = 32;
+                        firstSnd = false;
+                    } //if ends
+
+                    wemBytes.AddRange(files[i].ReadData(output).SubArray(readOffset));
+
+                } //if ends
+                else if (files[i].extension == ".end")
+                    if(wemBytes.Count > 0)
+                        File.WriteAllBytes(path + "\\" + Path.GetFileNameWithoutExtension(fileName) + ".wem", wemBytes.ToArray());
             } //for ends
         } //method Export ends
     } //class FsmFile ends
