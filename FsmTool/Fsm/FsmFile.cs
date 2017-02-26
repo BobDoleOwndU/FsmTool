@@ -4,16 +4,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace FsmTool.Fsm
 {
-    class FsmFile
+    [XmlType("FsmFile")]
+    public class FsmFile
     {
-        private uint signature;
-        private uint filesOffset;
+        [XmlAttribute("Name")]
+        public string name;
 
-        private List<FsmSubFile> files = new List<FsmSubFile>(0);
+        [XmlAttribute("Signature")]
+        public uint signature;
+
+        [XmlIgnore]
+        public uint filesOffset;
+
+        [XmlArray("Entries")]
+        public List<FsmSubFile> files = new List<FsmSubFile>(0);
 
         public void Read(Stream input)
         {
@@ -71,5 +79,22 @@ namespace FsmTool.Fsm
                         File.WriteAllBytes(path + "\\" + Path.GetFileNameWithoutExtension(fileName) + ".wem", wemBytes.ToArray());
             } //for ends
         } //method Export ends
+
+        public void Import(Stream output, string path)
+        {
+            string inputPath = Path.GetDirectoryName(path) + "\\" + Path.GetFileNameWithoutExtension(path);
+
+            BinaryWriter writer = new BinaryWriter(output, Encoding.Default, true);
+
+            writer.Write(signature);
+            writer.Write(0x10);
+            writer.WriteZeros(8);
+
+            for (int i = 0; i < files.Count(); i++)
+            {
+                byte[] file = File.ReadAllBytes(inputPath + "_fsm\\" + files[i].name);
+                writer.Write(file);
+            } //for ends
+        } //method Import ends
     } //class FsmFile ends
 } //namespace FsmTool.Fsm ends

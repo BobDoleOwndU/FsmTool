@@ -1,15 +1,25 @@
 ﻿using System.IO;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace FsmTool.Fsm
 {
-    class FsmSubFile
+    [XmlType("Entry", Namespace = "Fsm")]
+    public class FsmSubFile
     {
+        [XmlAttribute("FilePath")]
         public string name;
+
+        [XmlIgnore]
         public string extension;
 
+        [XmlIgnore]
         public long offset;
-        private uint signature;
+
+        [XmlIgnore]
+        public uint signature;
+
+        [XmlIgnore]
         public int size;
 
         public void Read(Stream input)
