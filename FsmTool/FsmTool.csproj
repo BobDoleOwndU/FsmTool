@@ -45,7 +45,6 @@
   <ItemGroup>
     <Compile Include="Ak\WemFile.cs" />
     <Compile Include="ExtensionMethods.cs" />
-    <Compile Include="Fsm\FsmDemoChunk0.cs" />
     <Compile Include="Fsm\FsmFile.cs" />
     <Compile Include="Fsm\FsmSubFile.cs" />
     <Compile Include="Program.cs" />

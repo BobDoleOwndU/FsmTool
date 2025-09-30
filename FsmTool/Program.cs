@@ -37,7 +37,7 @@ namespace FsmTool
                 }
             }
 
-            Console.Read();
+            //Console.Read();
         } //method main ends
 
         static void ReadArchive(string path)
