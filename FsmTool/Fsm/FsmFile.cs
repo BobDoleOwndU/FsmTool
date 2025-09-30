@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
+using FsmTool.Ak;
 
 namespace FsmTool.Fsm
 {
@@ -80,7 +81,7 @@ namespace FsmTool.Fsm
             } //for ends
         } //method Export ends
 
-        public void Import(Stream output, string path)
+        public void Import(Stream output, string path,uint soundPacketLength)
         {
             string inputPath = Path.GetDirectoryName(path) + "\\" + Path.GetFileNameWithoutExtension(path);
 
@@ -90,9 +91,68 @@ namespace FsmTool.Fsm
             writer.Write(0x10);
             writer.WriteZeros(8);
 
+            var wemPath = inputPath + "_fsm\\" + Path.GetFileNameWithoutExtension(path) + ".wem";
+            var wemFile = new WemFile();
+            var soundPackets = new Dictionary<double, byte[]>();
+            if (File.Exists(wemPath))
+            {
+                var reader = new BinaryReader(new FileStream(wemPath, FileMode.Open));
+                wemFile.Read(reader);
+                uint position = 0;
+                while (position < wemFile.fileSize)
+                {
+                    Console.WriteLine($"position: {position}, fileSize={wemFile.fileSize}");
+                    var time = wemFile.GetTimeAtPosition(position);
+                    reader.BaseStream.Position = position;
+                    var packetData = reader.ReadBytes((int)soundPacketLength);
+                    soundPackets[time] = packetData;
+                    position += soundPacketLength;
+                }
+                reader.Close();
+            }
+
+            var isWemFile = soundPackets.Count>0;
+            double lastTime = 0;
+            var isWemStarted = false;
             for (int i = 0; i < files.Count(); i++)
             {
-                byte[] file = File.ReadAllBytes(inputPath + "_fsm\\" + files[i].name);
+                var filePath = inputPath + "_fsm\\" + files[i].name;
+                byte[] file = File.ReadAllBytes(filePath);
+                if (isWemFile)
+                {
+                    var reader = new BinaryReader(new FileStream(filePath, FileMode.Open));
+                    uint packetType = reader.ReadUInt32();
+                    uint packetSize = reader.ReadUInt32();
+                    double packetTime = reader.ReadDouble();
+                    reader.Close();
+                    var previousPacketTime = lastTime;
+                    if (packetType == 541347411)
+                    {
+                        continue;
+                    }
+                    foreach (var pair in soundPackets)
+                    {
+                        if (previousPacketTime <= pair.Key && pair.Key < packetTime)
+                        {
+                            writer.Write(541347411);
+                            if (!isWemStarted)
+                                writer.Write(pair.Value.Length+0x20);
+                            else
+                                writer.Write(pair.Value.Length+0x10);
+                            writer.Write(pair.Key);
+                            if (!isWemStarted)
+                            {
+                                writer.Write(wemFile.fileSize);
+                                writer.Write(2);
+                                writer.WriteZeros(8);
+                                isWemStarted = true;
+                            }
+                            writer.Write(pair.Value);
+                            break;
+                        }
+                    }
+                    lastTime = packetTime;
+                }
                 writer.Write(file);
             } //for ends
         } //method Import ends

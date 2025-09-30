@@ -1,5 +1,7 @@
-﻿using FsmTool.Fsm;
+﻿using System;
+using FsmTool.Fsm;
 using System.IO;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace FsmTool
@@ -10,15 +12,32 @@ namespace FsmTool
 
         static void Main(string[] args)
         {
-            if(args.Length != 0)
-            {
-                string path = Path.GetFullPath(args[0]);
+            uint soundPacketLength = 0x20000;
+            var nextIsLength = false;
 
-                if (Path.GetExtension(path) == ".fsm")
-                    ReadArchive(args[0]);
-                else if (Path.GetExtension(path) == ".xml")
-                    WriteArchive(args[0]);
-            } //if ends
+            foreach (string arg in args)
+            {
+                if (nextIsLength == true)
+                {
+                    uint.TryParse(arg, out soundPacketLength);
+                    nextIsLength = false;
+                }
+                if (arg.ToLower() == "-snd_size")
+                {
+                    nextIsLength = true;
+                }
+                if (File.Exists(arg))
+                {
+                    string path = Path.GetFullPath(arg);
+
+                    if (Path.GetExtension(path) == ".fsm")
+                        ReadArchive(arg);
+                    else if (Path.GetExtension(path) == ".xml")
+                        WriteArchive(arg,soundPacketLength);
+                }
+            }
+
+            Console.Read();
         } //method main ends
 
         static void ReadArchive(string path)
@@ -42,7 +61,7 @@ namespace FsmTool
             } //using ends
         } //method ReadArchive ends
 
-        static void WriteArchive(string path)
+        static void WriteArchive(string path,uint soundPacketLength)
         {
             string outputPath = path.Replace(".xml", "");
 
@@ -51,7 +70,7 @@ namespace FsmTool
             {
                 FsmFile file = xmlSerializer.Deserialize(xmlInput) as FsmFile;
 
-                file.Import(output, outputPath);
+                file.Import(output, outputPath, soundPacketLength);
             } //using ends
         } //method WriteArchive ends
     } //class Program ends

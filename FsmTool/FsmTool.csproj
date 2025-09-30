@@ -43,7 +43,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ak\WemFile.cs" />
     <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="Fsm\FsmDemoChunk0.cs" />
     <Compile Include="Fsm\FsmFile.cs" />
     <Compile Include="Fsm\FsmSubFile.cs" />
     <Compile Include="Program.cs" />
@@ -52,7 +54,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
