@@ -101,7 +101,7 @@ namespace FsmTool.Fsm
                 uint position = 0;
                 while (position < wemFile.fileSize)
                 {
-                    Console.WriteLine($"position: {position}, fileSize={wemFile.fileSize}");
+                    //Console.WriteLine($"position: {position}, fileSize={wemFile.fileSize}");
                     var time = wemFile.GetTimeAtPosition(position);
                     reader.BaseStream.Position = position;
                     var packetData = reader.ReadBytes((int)soundPacketLength);
