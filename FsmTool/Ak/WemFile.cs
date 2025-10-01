@@ -76,6 +76,7 @@ namespace FsmTool.Ak
             SeekTable = new AkVorbisSeekTableItem[uNumSeekTableItems];
             uint uCurFileOffset = (uint)(uDataOffset + seekTableSize);
             uint uCurFrameOffset = 0;
+            double time = 0;
             for (int index = 0; index < uNumSeekTableItems; index++)
             {
                 var TableItem = new AkVorbisSeekTableItem();
@@ -83,7 +84,7 @@ namespace FsmTool.Ak
                 SeekTable[index] = TableItem;
                 uCurFrameOffset += TableItem.uPacketFrameOffset;
                 uCurFileOffset += TableItem.uPacketFileOffset;
-                double time = (double)uCurFrameOffset / SampleRate;
+                time += (double)TableItem.uPacketFrameOffset / SampleRate;
                 //Console.WriteLine($"{reader.BaseStream.Position}: {time} seconds");
             }
         }
@@ -91,20 +92,19 @@ namespace FsmTool.Ak
         public double GetTimeAtPosition(long position)
         {
             uint uCurFileOffset = (uint)(uDataOffset + seekTableSize);
-            uint uCurFrameOffset = 0;
+            //uint uCurFrameOffset = 0;
             double time = 0;
             foreach (AkVorbisSeekTableItem TableItem in SeekTable)
             {
-                uCurFrameOffset += TableItem.uPacketFrameOffset;
-                uCurFileOffset += TableItem.uPacketFileOffset;
                 if (uCurFileOffset > position)
                 {
                     Console.WriteLine($"GetTimeAtPosition uCurFileOffset: {uCurFileOffset} position: {position}: {time} seconds");
                     return time;
                 }
-                time = uCurFrameOffset / (double)SampleRate;
+                uCurFileOffset += TableItem.uPacketFileOffset;
+                //uCurFrameOffset += TableItem.uPacketFrameOffset;
+                time += (double)TableItem.uPacketFrameOffset / SampleRate;
             }
-            Console.WriteLine($"GetTimeAtPosition uCurFileOffset: {uCurFileOffset} position: {position}");
             return time;
         }
     }
